@@ -1,0 +1,177 @@
+CREATE TABLE player (id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT, team_id INT, FOREIGN KEY (team_id) REFERENCES team(id));
+
+CREATE TABLE parent (id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT);
+
+CREATE TABLE parent_player (id INTEGER PRIMARY KEY AUTOINCREMENT,
+parent_id INT, player_id INT, FOREIGN KEY (parent_id) REFERENCES parent(id), FOREIGN KEY (player_id) REFERENCES player(id));
+
+CREATE TABLE coach (id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT, team_id INT, FOREIGN KEY (team_id) REFERENCES team(id));
+
+CREATE TABLE team (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age_group_id INT, FOREIGN KEY (age_group_id) REFERENCES agegroup(id));
+
+CREATE TABLE agegroup (id INTEGER PRIMARY KEY AUTOINCREMENT, agegroupname TEXT);
+
+INSERT INTO agegroup (agegroupname) VALUES ('10-13');
+INSERT INTO agegroup (agegroupname) VALUES ('14-16');
+INSERT INTO agegroup (agegroupname) VALUES ('17-18');
+
+INSERT INTO team (name, age_group_id) VALUES ('Leeds',1);
+
+INSERT INTO team (name,age_group_id)
+VALUES 
+   ('Manchester',2),
+   ('Newcastle',2),
+   ('London',3);
+   
+INSERT INTO coach (name,team_id)
+VALUES 
+   ('coachy mccoach',3),
+   ('mrs coach',4),
+   ('coacher',2),
+   ('coachchacha', 1);
+   
+INSERT INTO player (name,team_id)
+VALUES
+    ('Olivia',1),
+    ('Amelia',2),
+    ('Isla',3),
+    ('Ava',4),
+    ('Ivy',1),
+    ('Freya',2),
+    ('Lily',3),
+    ('Florence',4);
+    
+INSERT INTO parent (name)
+VALUES
+    ('Adam'),
+    ('Bob'),
+    ('Carla'),
+    ('Doug'),
+    ('Eve'),
+    ('Frank'),
+    ('Gary'),
+    ('Harriet'),
+    ('Jared'),
+    ('Karlos'),
+    ('Loopy'),
+    ('Mark');
+
+INSERT INTO parent_player (player_id,parent_id)
+VALUES
+    (2,1),
+    (2,2);
+    
+INSERT INTO parent_player (player_id,parent_id)
+VALUES
+    (3,3),
+    (4,12),
+    (5,11),
+    (5,8),
+    (1,4),
+    (6,5),
+    (7,6),
+    (8,7),
+    (6,8),
+    (1,9),
+    (6,10);
+    
+SELECT * FROM player;
+
+SELECT * FROM team;
+
+SELECT * FROM player
+JOIN team
+ON team.id = player.team_id;
+
+SELECT name, parent.name FROM player
+JOIN parent_player
+ON player.id = parent_player.player_id
+JOIN parent
+ON parent.id = parent_player.parent_id;
+
+SELECT name, team.name FROM coach
+JOIN team
+ON team.id = coach.team_id;
+
+INSERT INTO player (name,team_id)
+VALUES
+    ('Mia',3),
+    ('Willow',1),
+    ('Rosie',4),
+    ('Sophie',3),
+    ('Isabelle',2),
+    ('Grace',2),
+    ('Daisy',4),
+    ('Sienna',1);
+
+INSERT INTO parent_player (player_id,parent_id)
+VALUES
+    (9,3),
+    (10,11),
+    (12,5),
+    (15,6),
+    (11,7),
+    (16,8),
+    (14,9),
+    (13,10);
+
+/*show all data*/
+SELECT * FROM player
+JOIN parent_player
+ON player.id = parent_player.player_id
+JOIN parent
+ON parent.id = parent_player.parent_id
+JOIN team
+ON team.id = player.team_id
+JOIN coach
+ON coach.team_id = team.id
+JOIN agegroup
+ON agegroup.id = team.age_group_id;
+
+INSERT INTO player (name)
+VALUES ('bethnoteam');
+
+
+/*left join*/
+SELECT * from player
+LEFT JOIN team
+ON team.id = player.team_id;
+
+/*players in the same team*/
+SELECT name from player
+JOIN team
+on team.id = player.team_id
+WHERE team.id = 2;
+
+SELECT name, player.name from parent
+JOIN parent_player
+ON parent.id = parent_player.parent_id
+JOIN player
+ON player.id = parent_player.player_id
+WHERE player.name = 'Amelia';
+
+/*nice table of all the data, also using aliases*/
+SELECT 
+    player.name AS player_name,
+    team.name AS team_name,
+    coach.name AS coach_name,
+    GROUP_CONCAT(parent.name, ', ') AS parents,
+    agegroup.agegroupname AS age_group
+FROM player
+LEFT JOIN team 
+ON team.id = player.team_id
+LEFT JOIN coach
+ON coach.team_id = team.id
+LEFT JOIN agegroup 
+ON agegroup.id = team.age_group_id
+LEFT JOIN parent_player 
+ON player.id = parent_player.player_id
+LEFT JOIN parent 
+ON parent.id = parent_player.parent_id
+GROUP BY player.name, team.name, coach.name, agegroup.agegroupname
+ORDER BY player.name;
+
+
